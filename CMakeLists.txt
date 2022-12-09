@@ -16,6 +16,16 @@ if(NOT EXISTS ${LLVM_CONFIG_EXECUTABLE})
   message(FATAL_ERROR "llvm-config could not be found!")
 endif()
 
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+
 execute_process(
   COMMAND ${LLVM_CONFIG_EXECUTABLE} --includedir
   OUTPUT_VARIABLE LLVM_INCLUDEDIR
