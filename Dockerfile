@@ -7,19 +7,19 @@ run set -x; \
     && apt-get autoremove -y -qq \
     && apt-get remove -y -qq clang llvm llvm-runtime \
     && apt-get install libgmp10 \
-    && echo 'ca-certificates valgrind libc6-dev libgmp-dev cmake ninja-build make autoconf automake libtool python python3 subversion re2c git clang libstdc++-10-dev redis' > /usr/src/build-deps \
+    && echo 'ca-certificates valgrind libc6-dev libgmp-dev cmake ninja-build make autoconf automake libtool python python3 subversion re2c git clang libstdc++-10-dev redis lsb-release wget software-properties-common gnupg' > /usr/src/build-deps \
     && apt-get install -y $(cat /usr/src/build-deps) --no-install-recommends
 
 add build_deps.sh /usr/src/souper/build_deps.sh
 add clone_and_test.sh /usr/src/souper/clone_and_test.sh
 
+run wget https://apt.llvm.org/llvm.sh
+run chmod +x llvm.sh
+run ./llvm.sh all
+
 run export CC=clang CXX=clang++ \
     && cd /usr/src/souper \
-#   && ./build_deps.sh Debug \
-#   && rm -r third_party/llvm-Debug-build \
-    && ./build_deps.sh Release \
-    && rm -r third_party/llvm-Release-build
-
+    && ./build_deps.sh Release
 
 add CMakeLists.txt /usr/src/souper/CMakeLists.txt
 add docs /usr/src/souper/docs
@@ -34,9 +34,6 @@ add unittests /usr/src/souper/unittests
 run export LD_LIBRARY_PATH=/usr/src/souper/third_party/z3-install/lib:$LD_LIBRARY_PATH \
     && mkdir -p /usr/src/souper-build \
     && cd /usr/src/souper-build \
-    && CC=/usr/src/souper/third_party/llvm-Release-install/bin/clang CXX=/usr/src/souper/third_party/llvm-Release-install/bin/clang++ cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DTEST_SYNTHESIS=ON ../souper \
-    && ninja \
-    && ninja check \
     && cd .. \
     && rm -rf /usr/src/souper-build \
     && groupadd -r souper \
@@ -44,3 +41,8 @@ run export LD_LIBRARY_PATH=/usr/src/souper/third_party/z3-install/lib:$LD_LIBRAR
     && mkdir /data \
     && chown souper:souper /data \
     && rm -rf /usr/local/include /usr/local/lib/*.a /usr/local/lib/*.la
+
+#run mkdir -p /usr/src/souper/build \
+#    && cd /usr/src/souper/build \
+#    && cmake -DCMAKE_BUILD_TYPE=Release /usr/src/souper \
+#    && make
